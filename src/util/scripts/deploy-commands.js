@@ -1,10 +1,12 @@
-import { APIApplicationCommand, REST, RESTPostAPIApplicationCommandsJSONBody, Routes } from 'discord.js';
-import fs from 'node:fs';
-import path from 'node:path';
+const { REST, Routes } = require('discord.js');
+const fs = require('fs');
+const path = require('path');
+
+
 
 require('dotenv').config();
 
-const commands: RESTPostAPIApplicationCommandsJSONBody[] = [];
+const commands = [];
 
 const foldersPath = path.join(__dirname, '../../commands');
 const commandFolders = fs.readdirSync(foldersPath);
@@ -26,7 +28,7 @@ for (const folder of commandFolders) {
 }
 
 
-const rest = new REST().setToken(process.env.DISCORD_TOKEN as string);
+const rest = new REST().setToken(process.env.DISCORD_TOKEN );
 
 // and deploy your commands!
 (async () => {
@@ -35,9 +37,9 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN as string);
 
 		// The put method is used to fully refresh all commands in the guild with the current set
 		const data = await rest.put(
-			Routes.applicationCommands(process.env.CLIENT_ID as string),
+			Routes.applicationCommands(process.env.CLIENT_ID),
 			{ body: commands },
-		) as APIApplicationCommand[] ;
+		);
 
 		console.log(`Successfully reloaded ${data.length} application (/) commands.`);
 	} catch (error) {
