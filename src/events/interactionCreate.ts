@@ -1,13 +1,13 @@
-const { Events, MessageFlags, Collection } = require('discord.js');
+import { Events, MessageFlags, Collection, BaseInteraction } from 'discord.js';
 
 module.exports = {
 	name: Events.InteractionCreate,
-	async execute(interaction) {
+	async execute(interaction: BaseInteraction) {
 		if (!interaction.isChatInputCommand()) return;
 
-		const {cooldowns} = interaction.client
+		const cooldowns = (interaction.client as any).cooldowns || new Collection();		///I don't like tis 5alees
 
-		const command = interaction.client.commands.get(interaction.commandName);
+		const command = (interaction.client as any).commands.get(interaction.commandName);
 
 		if (!command) {
 			console.error(`No command matching ${interaction.commandName} was found.`);
