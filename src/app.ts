@@ -5,8 +5,10 @@ import { DiscordClient } from "./util/lib/DiscordClient";
 
 
 
-require('dotenv').config();
+require('dotenv').config();		///////////////ALL URLS ARE LOCALLL/DOCKER
 
+
+////jjw
 
 
 const client = new DiscordClient({intents: [GatewayIntentBits.Guilds]});
