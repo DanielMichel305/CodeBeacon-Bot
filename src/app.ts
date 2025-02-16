@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { GatewayIntentBits, Collection } from 'discord.js';
 import { DiscordClient } from "./util/lib/DiscordClient";
+import { BotEventHandler } from './events/baseEventHandler';
+import { MQHandler } from './util/MQHandler';
 
 
 
@@ -11,7 +13,7 @@ require('dotenv').config();		///////////////ALL URLS ARE LOCALLL/DOCKER
 ////jjw
 
 
-const client = new DiscordClient({intents: [GatewayIntentBits.Guilds]});
+const client = new DiscordClient({intents: [GatewayIntentBits.Guilds,GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]});
 
 
 const foldersPath = path.join(__dirname, "commands");
@@ -65,3 +67,10 @@ for (const file of eventFiles) {
 
 
 client.login(process.env.DISCORD_TOKEN);
+
+
+(async ()=>{
+	const botEventHndlr = new BotEventHandler(client)
+	await botEventHndlr.init();
+	await botEventHndlr.startMessageQueueListener('SCD-CH1')
+})();
