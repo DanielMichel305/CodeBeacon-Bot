@@ -1,4 +1,4 @@
-import { ChatInputCommandInteraction, Interaction, MessageFlags, Options, SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js';
+import { ChatInputCommandInteraction, EmbedBuilder, Interaction, MessageFlags, MessagePayload, Options, SlashCommandBuilder, SlashCommandSubcommandBuilder } from 'discord.js';
 import { MQHandler, MQListener } from '../../../util/MQHandler';
  
 
@@ -9,32 +9,46 @@ const setupNotificationChannel  = {
     .setName('notification-channel')
     .setDescription('Set The Channel to get build, CI and Bot notificaions in.')
     .addChannelOption(option=>option.setName('channel').setDescription('Channel for notifications')),
+
     async execute(interaction: ChatInputCommandInteraction){
-        await interaction.deferReply({flags:MessageFlags.Ephemeral})    ///Maybe reply and delete later?
-        ///do the fetch
+
+        await interaction.deferReply({flags: MessageFlags.Ephemeral})    ///Maybe reply and delete later?
+        
         const channelName = interaction.options.getChannel("channel");
 
         if(!channelName){
-            return interaction.reply({content: `${channelName} is Invalid, double check the channel name!`});
+            return interaction.editReply({content: `${channelName} is Invalid, double check the channel name!`});
         }
 
-        fetch('http://scd-http:8080/api/webhooks/5697ws/notification', {
-            method:'HEAD'
-        }).then(async res=>{
-            const mq =  new MQHandler("SCD-DISCORD-QUEUE");
-            await mq.initConnection();
-            //const mqListener = new MQListener(mq);
-            mq.sendMessage(mq.getQueueDefaultName(),JSON.stringify({message: "TEST from discord", guildID: interaction.guildId})).then(()=>{console.log("sent message to SCD_QUEUE!!")});
-        }).then(async ()=>{
+        const mq: MQHandler = new MQHandler("SCD-BOT-SETUP");
+        await mq.initConnection();
+
+        mq.sendMessage(mq.getQueueDefaultName(),JSON.stringify({
+            message: "TEST from discord",
+            guildID: interaction.guildId,
+            channelId: channelName.id
+        }))
+
+        .then(async ()=>{ 
             const channelId = channelName.id;
-            await interaction.editReply(`Set channel ${channelName} (channel id: ${channelId}) as notifications channel`); 
-        }
-        ).catch(async err=>{
-            console.log("ERROR SENDING HEAD REQUEST", err);
-            await interaction.editReply(`Error Setting Channel!`); 
-
+                const embed = new EmbedBuilder()
+                .setTitle("Setup Action")
+                .setDescription('/setup notifaction-channel was used to set the channel for receiving Notifactions')
+                .addFields(
+                    {name: "Channel Name", value:`${channelName}`},
+                    {name: "Channel ID", value: `${channelId}`}
+                )
+                .setTimestamp()
+                //await interaction.editReply('Notification channel set successfully');
+                //await interaction.editReply({embeds: [embed]});
+                await interaction.followUp({embeds:[embed]});
         })
 
+        .catch(async (err)=>{
+            console.log(`Error Setting Channel ${err}`);
+            await interaction.editReply("Error Setting Notifactions channel");    //maybe change the message to be visible not ephemeral using a followup
+        });
+      
        
 
     }

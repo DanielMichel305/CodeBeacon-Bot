@@ -3,12 +3,6 @@ import {EventEmitter} from "events";
 //const amqp = require('amqplib/callback_api');
 require('dotenv').config();
 
-//This class can either be a singleton and hae a way to create multiple channels and have them accessible anywhere in the code.
-//OR just be a normal class and when multiple channels are required then multiple objects are created
-
-
-
-///This needs some refactoring and more error/edgecase handling 
 
 export class MQListener extends EventEmitter {
 
