@@ -23,7 +23,7 @@ const setupNotificationChannel  = {
         }
 
         MQHandler.url = process.env.SCD_RMQ_URL as string
-        await MQHandler.connect();
+        await MQHandler.connect();                                  //////I DON'T NEED TO CONNECT EVERYTIME THO, RIGHT? just use getInstance() maybe? or initialize con in app.ts
         const channel : any = await MQHandler.createChannel('SCD-CH1');
 
         (await MQHandler.getInstance()).sendToQueue(channel,'SCD-BOT-SETUP',Buffer.from(JSON.stringify(

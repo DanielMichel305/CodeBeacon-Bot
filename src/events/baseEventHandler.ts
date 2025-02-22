@@ -1,3 +1,4 @@
+import { EmbedBuilder } from "discord.js";
 import { DiscordClient } from "../util/lib/DiscordClient";
 import { MQHandler, MQListener } from "../util/MQHandler";
 import {Channel, ConsumeMessage} from 'amqplib';
@@ -44,7 +45,21 @@ export class BotEventHandler {
         const channel =  await this.Client?.channels.fetch(inspectionData.discordChannel);
         if(channel && channel.isSendable()){
             console.log('LHWFLHAWF WAWAWAWAWAWAWAWWAW KAKA ');
-            await channel.send({content: `An Inspection on repo ${inspectionData.inspectionData.repoName} was created and this is a notification telling you so`})
+            const messageContent = new EmbedBuilder()
+            .setTitle('Inspection Created!')
+            .setDescription('A new Inspection was created.')            /////Add more info to message (branch name, commit title, etcc...)
+            .addFields(
+                {name: "Inspection Creation time", value: inspectionData.inspectionData.createdAt, inline: true},
+                {name: "repository name", value: inspectionData.inspectionData.repoName, inline: true},
+                {name: "inspection Id", value: inspectionData.inspectionData.inspection_id}
+            )
+            .setTimestamp()
+            .setColor('Green');
+            if(inspectionData.status === "completed"){
+                messageContent.setColor('Green')
+            }
+
+            await channel.send({embeds:[messageContent]});
         }
     }
 
