@@ -1,4 +1,4 @@
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, Guild } from "discord.js";
 import { DiscordClient } from "../util/lib/DiscordClient";
 import { MQHandler, MQListener } from "../util/MQHandler";
 import {Channel, ConsumeMessage} from 'amqplib';
@@ -48,16 +48,39 @@ export class BotEventHandler {
             const messageContent = new EmbedBuilder()
             .setTitle('Inspection Created!')
             .setDescription('A new Inspection was created.')            /////Add more info to message (branch name, commit title, etcc...)
+            
             .addFields(
-                {name: "Inspection Creation time", value: inspectionData.inspectionData.createdAt, inline: true},
                 {name: "repository name", value: inspectionData.inspectionData.repoName, inline: true},
-                {name: "inspection Id", value: inspectionData.inspectionData.inspection_id}
+                {name: "branch", value: inspectionData.inspectionData.branch, inline: true},
+                {name: "commit message", value: inspectionData.inspectionData.commitMessage}
+            )
+            .addFields(    
+                {name: "Inspection Creation time", value: inspectionData.inspectionData.createdAt, inline: true},
+                {name: "inspection Id", value: inspectionData.inspectionData.inspection_id, inline: true}
             )
             .setTimestamp()
-            .setColor('Green');
-            if(inspectionData.status === "completed"){
-                messageContent.setColor('Green')
+            switch (inspectionData.status) {
+                case "completed":
+                    messageContent.setColor('Green');
+                    
+                break;
+                case "failed":
+                    messageContent.setColor('Red');
+                    messageContent.setTitle('Inspection Faliure!')
+                break;
+                default:
+                    messageContent.setColor('Blue');
+                    
+                break;
             }
+            if(inspectionData.roleId){
+                const guild = await this.Client?.guilds.fetch(inspectionData.guildId);
+                const role = await guild?.roles.fetch(inspectionData.roleId);
+                messageContent.addFields(
+                    {name: "\u200b", value: `${role}`}
+                )
+            }
+         
 
             await channel.send({embeds:[messageContent]});
         }
