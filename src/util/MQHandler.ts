@@ -45,7 +45,7 @@ export class MQHandler{
 
     private static instance: MQHandler 
     private static connection? : amqp.Connection;
-    private static channels: Map<string, amqp.Channel>
+    private static channels: Map<string, amqp.Channel> = new Map();
     public static url: string
 
     private  constructor(){
@@ -81,9 +81,11 @@ export class MQHandler{
             throw new Error("RabbitMQ Connection not initialized, Call connect() first");
         }
         if(this.channels?.has(channelName)){
+            console.log(`[LOG] ${channelName} Already exists!`)
             return this.channels.get(channelName)!;
         }
         const channel = await MQHandler.connection.createChannel();
+        console.log(`[LOG] ${channelName} CREATED!`)
         this.channels?.set(channelName, channel);
         return channel;
     }

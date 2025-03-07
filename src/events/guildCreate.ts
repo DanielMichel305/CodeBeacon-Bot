@@ -28,12 +28,12 @@ module.exports = {
         const corrId = uuid()
 
         const channel : Channel = await MQHandler.createChannel('SCD-CH1');
-
-        const replyQ = await channel.assertQueue(`rpc.dashboard.auth.guild_access.reply`,{durable:true});
+        ////
+        const replyQ = await channel.assertQueue(`rpc.dashboard.auth.guild_access.reply`,{durable:true, exclusive: true});
         
         channel.consume(replyQ.queue, async(msg)=>{
             if(!msg) return;
-            if(msg?.properties.correlationId === corrId){
+            if(msg.properties.correlationId === corrId){
                 if(!isInstanceAllowedInGuild(msg.content.toString())){
 
 
@@ -45,6 +45,7 @@ module.exports = {
                         .setColor('Yellow');
                     await guild.systemChannel?.send({embeds :[embed]})
                     await guild.leave();
+                    
                 }
             }
             channel.ack(msg)
